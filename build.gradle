@@ -1,0 +1,35 @@
+buildscript {
+    ext.kotlin_version = '1.2.41'
+
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+group 'com.cnkaptan'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'kotlin'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    def $vertx_version = '3.5.1'
+    compile group: 'io.vertx', name: 'vertx-core', version: $vertx_version
+    compile group: 'io.vertx', name: 'vertx-web', version: $vertx_version
+    compile group: 'io.vertx', name: 'vertx-lang-kotlin', version: $vertx_version
+    compile group: 'io.vertx', name: 'vertx-lang-kotlin-coroutines', version: $vertx_version
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}

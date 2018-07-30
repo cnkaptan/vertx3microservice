@@ -1,57 +1,17 @@
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Route
-import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
-import io.vertx.ext.web.handler.BodyHandler
-import io.vertx.kotlin.core.json.json
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.experimental.launch
 
 fun main(vararg args: String) {
     val vertx = Vertx.vertx()
-    val router = Router.router(vertx)
-
-//    vertx.createHttpServer().requestHandler { req ->
-//        req.response().end("OK")
-//    }.listen(8080)
 
     /**
-     * This will tell Vert.x to parse the request body into JSON for any request.
+     * Now we need to start this verticle. There are different ways of doing that,
+     * but the simplest way is to pass the instance of this class to the deployVerticle() method:
      */
-    router.route().handler(BodyHandler.create())
-
-
-    router.get("/alive").asyncHandler {
-        // Some response comes here
-        // We now can use any suspending function in this context
-        val json = """
-            {alive: true}
-            """.trim()
-        it.response().end(json)
-    }
-
-    router.post("/api/v1/cats").asyncHandler { ctx ->
-        // Some code of adding a cat comes here
-    }
-
-    router.get("/api/v1/cats").asyncHandler { ctx ->
-        // Code for getting all the cats
-    }
-
-    router.get("/api/v1/cats/:id").asyncHandler {ctx ->
-        // Fethces spesific cat
-    }
-
-    router.get().handler {
-
-    }
-
-
-    /**
-     *  Now connect your router to the server.
-     *  You can do that by replacing the previous server instantiation with the following line:
-     */
-    vertx.createHttpServer().requestHandler(router::accept).listen(8080)
+    vertx.deployVerticle(ServerVerticle())
 }
 
 

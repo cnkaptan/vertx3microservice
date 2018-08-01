@@ -44,7 +44,7 @@ class CatVerticle : CoroutineVerticle() {
              */
             try {
                 val body = req.body()
-                val id: Int? = body.get("id")
+                val id: Int? = body.get<String>("id").toInt()
                 val result = if (id != null) {
                     db.query(QUERY_WITH_ID, id)
                 } else {

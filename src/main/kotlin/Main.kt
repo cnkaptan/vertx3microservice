@@ -1,5 +1,6 @@
 import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
+import io.vertx.core.eventbus.Message
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.jdbc.JDBCClient
@@ -21,6 +22,7 @@ fun main(vararg args: String) {
      * but the simplest way is to pass the instance of this class to the deployVerticle() method:
      */
     vertx.deployVerticle(ServerVerticle())
+    vertx.deployVerticle(CatVerticle())
 }
 
 
@@ -47,28 +49,28 @@ fun RoutingContext.respond(responseBody: String = "", status: Int = 200) {
 }
 
 // We now will create JDBCClient by using this configuration code:
-fun CoroutineVerticle.getDbClient(): JDBCClient{
+fun CoroutineVerticle.getDbClient(): JDBCClient {
     val postgreSQLClientConfig = JsonObject(
             "url" to "jdbc:postgresql://${Config.Db.host}:5432/${Config.Db.database}",
             "username" to Config.Db.username,
             "password" to Config.Db.password)
 
-    return JDBCClient.createShared(vertx,postgreSQLClientConfig)
+    return JDBCClient.createShared(vertx, postgreSQLClientConfig)
 }
 
 // o simplify working with the JDBCClient, we'll add a method called query() to it:
-fun JDBCClient.query(q: String, vararg params: Any): Deferred<JsonObject>{
+fun JDBCClient.query(q: String, vararg params: Any): Deferred<JsonObject> {
     val deferred = CompletableDeferred<JsonObject>()
     this.getConnection { conn ->
         conn.handle({
             result().queryWithParams(q, params.toJsonArray()) { res ->
                 res.handle({
                     deferred.complete(res.result().toJson())
-                },{
+                }, {
                     deferred.completeExceptionally(res.cause())
                 })
             }
-        },{
+        }, {
             deferred.completeExceptionally(conn.cause())
         })
     }
@@ -76,9 +78,9 @@ fun JDBCClient.query(q: String, vararg params: Any): Deferred<JsonObject>{
 }
 
 // We'll also add the toJsonArray() method since that's what our JDBCClient works with:
-private fun <T> Array<T>.toJsonArray(): JsonArray{
+private fun <T> Array<T>.toJsonArray(): JsonArray {
     val json = JsonArray()
-    for(e in this){
+    for (e in this) {
         json.add(e)
     }
     return json
@@ -87,10 +89,10 @@ private fun <T> Array<T>.toJsonArray(): JsonArray{
 // Note here how Kotlin generics are being used to simplify the conversion while staying type-safe.
 
 //And we'll add a handle() function, which will provide us with a simple API to handle asynchronous errors:
-inline fun <T> AsyncResult<T>.handle(success: AsyncResult<T>.()-> Unit, failure: () -> Unit){
-    if(this.succeeded()){
+inline fun <T> AsyncResult<T>.handle(success: AsyncResult<T>.() -> Unit, failure: () -> Unit) {
+    if (this.succeeded()) {
         success()
-    }else{
+    } else {
         this.cause().printStackTrace()
         failure()
     }

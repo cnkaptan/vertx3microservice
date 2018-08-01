@@ -1,6 +1,9 @@
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.Router.router
 import io.vertx.ext.web.handler.BodyHandler
+import io.vertx.kotlin.core.json.get
+import io.vertx.kotlin.core.json.json
+import io.vertx.kotlin.core.json.obj
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 
 /**
@@ -23,27 +26,34 @@ class ServerVerticle: CoroutineVerticle(){
 
     private fun router(): Router{
         val router = Router.router(vertx)
+        val dbClient = getDbClient()
 
-        router.mountSubRouter("/api/v1",apiRouter())
+        /**
+         * This will tell Vert.x to parse the request body into JSON for any request.
+         */
+        router.route("/*").handler(BodyHandler.create())
 
         router.get("/alive").asyncHandler {
+            val dbAlive = dbClient.query("select true as alive")
             // Some response comes here
             // We now can use any suspending function in this context
-            val json = """
-            {alive: true}
-            """.trim()
-            it.response().end(json)
+            val json = json {
+                obj(
+                        "alive" to true,
+                        "db" to dbAlive.await()["rows"]
+                )
+            }
+            it.respond(json.toString())
         }
+
+        router.mountSubRouter("/api/v1",apiRouter())
 
         return router
     }
 
     private fun apiRouter(): Router{
         val router = Router.router(vertx)
-        /**
-         * This will tell Vert.x to parse the request body into JSON for any request.
-         */
-        router.route().handler(BodyHandler.create())
+
 
         router.post("/cats").asyncHandler { ctx ->
             // Some code of adding a cat comes here

@@ -25,8 +25,11 @@ dependencies {
     compile group: 'io.vertx', name: 'vertx-web', version: $vertx_version
     compile group: 'io.vertx', name: 'vertx-lang-kotlin', version: $vertx_version
     compile group: 'io.vertx', name: 'vertx-lang-kotlin-coroutines', version: $vertx_version
-    compile group: 'io.vertx', name: 'vertx-jdbc-client', version: '3.0.0-milestone6'
-    compile group: 'com.google.code.gson', name: 'gson', version: '2.7'
+    compile group: 'io.vertx', name: 'vertx-jdbc-client', version: $vertx_version
+    compile group: 'io.vertx', name: 'vertx-web-client', version: $vertx_version
+    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.22"
+    compile group: 'org.postgresql', name: 'postgresql', version: '42.2.2'
+    testCompile group: 'org.testng', name: 'testng', version: '6.11'
 }
 
 compileKotlin {
